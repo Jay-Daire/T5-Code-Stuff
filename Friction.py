@@ -10,7 +10,8 @@ for i in range(len(xdata)):
     xdata[i]=data["T"+str(i+1)+"(s)"]
     xdata[i]=xdata[i].dropna()
     ydata[i]=data["R"+str(i+1)]
-    ydata[i] = np.log((2*np.pi*(ydata[i]))/16/60)
+    ydata[i] = np.log((2 * np.pi * (ydata[i])) / 16 / 60)
+    ydata[i] = ydata[i].replace(-np.inf, 0)
     ydata[i]=ydata[i].dropna()
 
 
@@ -27,9 +28,19 @@ B=24.16e-3
 # Simplifying constant for the plug and chug
 k = (electrical_conductivity * pole_disk_distance ** 2 * pole_area * disk_thickness) * B**2
 
+def best_fit(x,m,c,d):
+    return c-d*(np.exp(m*x))
+#Plotting results. When I print popt for each line of best fit, it is to see if m is a constant or if this fit
+#is wrong, basically.
 for i in range(len(xdata)-1):
-    plt.plot(xdata[i],ydata[i],label=("R"+str(i+1)))
-plt.plot(xdata[12],ydata[12],label=("R13"))
+    plt.plot(xdata[i],ydata[i],'o',label=("R"+str(i+1)))
+    popt, pcov = curve_fit(best_fit, xdata[i], ydata[i])
+    plt.plot(xdata[i], best_fit(xdata[i], *popt), '-')
+    print(popt)
+plt.plot(xdata[12],ydata[12],'o',label=("R13"))
+popt,pcov=curve_fit(best_fit,xdata[12],ydata[12])
+plt.plot(xdata[12],best_fit(xdata[12],*popt),'-')
+print(popt)
 
 plt.ylim(0)
 plt.xlim(0)
