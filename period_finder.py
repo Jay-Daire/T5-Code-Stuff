@@ -2,14 +2,18 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-dataframe = pd.read_csv("C:/Users/cuco2/Desktop/Physics/Year 2/Experimental physics/Semester 2/Computing coursework/Python code/CSV files lab/al02.csv")
 
-time = dataframe["second"]
-voltage = dataframe["Volt"]
+# Apparently not every measurement starts at t = 0, to get good plots we
+# need to look at the plots of the data and estimate
+# when it starts declining. Means we will need to briefly glance at around
+# 2k plots
 
-def get_rid_of_t_smaller_than_0(time, voltage):
+
+#RUN CODE FROM TERMINAL DO NOT EDIT
+
+def get_rid_of_useless_times(time, voltage, time_when_decay_starts):
     for i in range(len(time)):
-        if time[i] == 0:
+        if np.floor(time[i]) == time_when_decay_starts:
             index = i
     corrected_time = time[index: ]
     corrected_time = corrected_time.reset_index()
@@ -20,21 +24,90 @@ def get_rid_of_t_smaller_than_0(time, voltage):
     return corrected_time, corrected_voltage
 
 def period_finder(time, voltage, number_of_strips = 1):
-    times = []
-    periods = []
-    v_ang = []
+    times = pd.Series(dtype = float, index = (i for i in range(30000)))
+    periods = pd.Series(dtype = float,index = (i for i in range(10000)))
+    v_ang = pd.Series(dtype= float, index = (i for i in range(10000)))
+    j = 0
     for i in range(len(voltage)):
         if voltage[i] < 10:
-            times.append(time[i])
+            times[j] = time[i]
+            j= j+1
+    j = 0
+    times = times.dropna()
     for i in range(len(times)-1):
         t1 = time[i]
         t2 = times[i+1]
-        periods.append(t2-t1)
+        periods[j] = t2-t1
+        j = j+1
+    j = 0
+    periods = periods.dropna()
     for i in periods:
-        v_ang.append(2*np.pi/(i*number_of_strips))
+        v_ang[j] = 2*np.pi/(i*number_of_strips)
+        j= j+1
+    v_ang = v_ang.dropna()
     return v_ang, times
 
-new_time, new_voltage = get_rid_of_t_smaller_than_0(time, voltage)
-list_of_periods, new_new_times = period_finder(new_time, new_voltage)
-plt.plot(new_new_times[:-1], list_of_periods)
-plt.show()
+Guten_morgen = input("Do you want to overplot several measurements? If so, how many?")
+
+try:
+    Guten_morgen = int(Guten_morgen)
+    if Guten_morgen == 1:
+        print("Then you don't want to overplot anything, dumbass")
+        name_of_file = input("What is the name of the file you want analyzed? ")
+        dataframe = pd.read_csv(
+            f"C:/Users/cuco2/Desktop/Physics/Year 2/Experimental physics/Semester 2/Computing coursework/Python code/CSV files lab/{name_of_file}.csv")
+        measurement_start = int(input("To the nearest integer, when would you say decay starts for this measurement? "))
+        time = dataframe["second"]
+        voltage = dataframe["Volt"]
+        new_time, new_voltage = get_rid_of_useless_times(time, voltage, measurement_start)
+        angular_velocity, time_axis = period_finder(new_time - measurement_start, new_voltage)
+        plt.plot(time_axis[:-1], angular_velocity)
+        answer = input("Do you want the title displayed in the image? y/n")
+        if answer == "yes" or answer == "y":
+            plt.title(f"{name_of_file}")
+            plt.xlabel("time (s)")
+            plt.ylabel("$\omega\ \mathrm{rad/s}$")
+            plt.xlim(0, )
+            plt.savefig(f"{name_of_file}plot")
+        else:
+            plt.xlabel("time (s)")
+            plt.ylabel("$\omega\ (\mathrm{rad/s})$")
+            plt.xlim(0, )
+            plt.savefig(f"{name_of_file}plot")
+    else: #They do want to overplot several measuerements
+        name_of_plot =input("What will you call your plot? ")
+        for i in range(Guten_morgen):
+            #save something to a df, then plot that dataframe and save the figure otuside the for loop
+            name_of_file = input(f"What's the name of the file no. {i} you want to plot")
+            dataframe = pd.read_csv(f"C:/Users/cuco2/Desktop/Physics/Year 2/Experimental physics/Semester 2/Computing coursework/Python code/CSV files lab/{name_of_file}.csv")
+            time = dataframe["second"]
+            voltage = dataframe["Volt"]
+            measurement_start = int(
+            input("To the nearest integer, when would you say decay starts for this measurement? "))
+            new_time, new_voltage = get_rid_of_useless_times(time, voltage, measurement_start)
+            angular_velocity, time_axis = period_finder(new_time - measurement_start, new_voltage)
+            plt.plot(time_axis[:-1], angular_velocity)
+            plt.legend(f"{name_of_file}")
+        plt.savefig(f"{name_of_plot}")
+except ValueError:  #the user does not want to analyze more than one file
+    name_of_file = input("What is the name of the file you want analyzed? ")
+    dataframe = pd.read_csv(
+        f"C:/Users/cuco2/Desktop/Physics/Year 2/Experimental physics/Semester 2/Computing coursework/Python code/CSV files lab/{name_of_file}.csv")
+    time = dataframe["second"]
+    voltage = dataframe["Volt"]
+    measurement_start = int(input("To the nearest integer, when would you say decay starts for this measurement? "))
+    new_time, new_voltage = get_rid_of_useless_times(time, voltage, measurement_start)
+    angular_velocity, time_axis = period_finder(new_time - measurement_start, new_voltage)
+    plt.plot(time_axis[:-1], angular_velocity)
+    answer = input("Do you want the title displayed in the image? y/n")
+    if answer == "yes" or answer == "y":
+        plt.title(f"{name_of_file}")
+        plt.xlabel("time (s)")
+        plt.ylabel("$\omega\ \mathrm{rad/s}$")
+        plt.xlim(0, )
+        plt.savefig(f"{name_of_file}plot")
+    else:
+        plt.xlabel("time (s)")
+        plt.ylabel("$\omega\ (\mathrm{rad/s})$")
+        plt.xlim(0, )
+        plt.savefig(f"{name_of_file}plot")
