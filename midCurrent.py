@@ -8,7 +8,7 @@ sheet_2 = pd.read_excel(Location, sheet_name = "I = 0.098")
 
 xdata1 = sheet_2["T1(s)"]
 xdata1 = xdata1.dropna()
-ydata1 = sheet_2["R1"]*0.10472/16
+ydata1 = sheet_2["R1"]*0.10472/16 # Converting data to rad/s
 ydata1 = ydata1.dropna()
 
 xdata2 = sheet_2["T2(s)"]

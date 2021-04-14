@@ -12,10 +12,15 @@ import matplotlib.pyplot as plt
 #RUN CODE FROM TERMINAL DO NOT EDIT
 
 def get_rid_of_useless_times(time, voltage, time_when_decay_starts):
-    for i in range(len(time)):
-        if np.floor(time[i]) == time_when_decay_starts:
-            index = i
-    corrected_time = time[index: ]
+    if time_when_decay_starts == 0:
+        for i in range(len(time)):
+            if time[i] == 0:
+                index = i
+    else:
+        for i in range(len(time)):
+            if np.floor(time[i]) == time_when_decay_starts:
+                index = i
+    corrected_time = time[index:]
     corrected_time = corrected_time.reset_index()
     corrected_time = corrected_time["second"]
     corrected_voltage = voltage[index: ]
@@ -73,11 +78,13 @@ def plot_a_file():
         plt.ylabel("$\omega\ \mathrm{rad/s}$")
         plt.xlim(0, )
         plt.savefig(f"{name_of_file}plot")
+        plt.close()
     else:
         plt.xlabel("time (s)")
         plt.ylabel("$\omega\ (\mathrm{rad/s})$")
         plt.xlim(0, )
         plt.savefig(f"{name_of_file}plot")
+        plt.close()
     return None
 
 def overplot(number_of_plots):
@@ -94,12 +101,14 @@ def overplot(number_of_plots):
             input("To the nearest integer, when would you say decay starts for this measurement? "))
         new_time, new_voltage = get_rid_of_useless_times(time, voltage, measurement_start)
         angular_velocity, time_axis = period_finder(new_time - measurement_start, new_voltage)
-        plt.plot(time_axis[:-1], angular_velocity)
-        plt.legend(f"{name_of_file}")
+        plt.plot(time_axis[:-1], angular_velocity, label = f"{name_of_file}")
+        plt.legend()
+    plt.xlim(0,)
     plt.savefig(f"{name_of_plot}")
+    plt.close()
 
-if __name__ == "main":
 
+if __name__ == "__main__":
     Guten_morgen = input("Do you want to overplot several measurements? If so, how many?")
 
     try:
