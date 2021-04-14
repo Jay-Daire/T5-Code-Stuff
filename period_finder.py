@@ -7,7 +7,14 @@ import matplotlib.pyplot as plt
 # need to look at the plots of the data and estimate
 # when it starts declining. Means we will need to briefly glance at around
 # 2k plots
+editor = input("Who's editing?")
+if editor == "Jonathan":
+    Jonathan = 1
+else:
+    Jonathan = 0
 
+IgnacioPath = "C:/Users/cuco2/Desktop/Physics/Year 2/Experimental physics/Semester 2/Computing coursework/Python code/CSV files lab/"
+JonathanPath = ""
 
 #RUN CODE FROM TERMINAL DO NOT EDIT
 
@@ -64,7 +71,7 @@ def plot_a_file():
     #Plots a single file from a dataset
     name_of_file = input("What is the name of the file you want analyzed? ")
     dataframe = pd.read_csv(
-        f"C:/Users/cuco2/Desktop/Physics/Year 2/Experimental physics/Semester 2/Computing coursework/Python code/CSV files lab/{name_of_file}.csv")
+        f"{IgnacioPath}{name_of_file}.csv", skiprows = Jonathan)
     measurement_start = int(input("To the nearest integer, when would you say decay starts for this measurement? "))
     time = dataframe["second"]
     voltage = dataframe["Volt"]
@@ -94,7 +101,7 @@ def overplot(number_of_plots):
         # save something to a df, then plot that dataframe and save the figure otuside the for loop
         name_of_file = input(f"What's the name of the file no. {i} you want to plot")
         dataframe = pd.read_csv(
-            f"C:/Users/cuco2/Desktop/Physics/Year 2/Experimental physics/Semester 2/Computing coursework/Python code/CSV files lab/{name_of_file}.csv")
+            f"{IgnacioPath}{name_of_file}.csv", skiprows = Jonathan)
         time = dataframe["second"]
         voltage = dataframe["Volt"]
         measurement_start = int(
