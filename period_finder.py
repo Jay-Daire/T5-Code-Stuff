@@ -81,8 +81,8 @@ def plot_a_file():
     new_time, new_voltage = time_trimmer(time, voltage, measurement_start)
     angular_velocity, time_axis = period_finder(new_time - measurement_start, new_voltage)
     #New code added by Jon - seems to be causing an error with scipy.
-    plt.plot(time_axis[:-1], angular_velocity, maxfev=10000)
-    popt, pcov = cf(best_fit, time_axis[:-1], angular_velocity)
+    plt.plot(time_axis[:-1], angular_velocity, 'o')
+    popt, pcov = cf(best_fit, time_axis[:-1], angular_velocity, maxfev=10000)
     plt.plot(time_axis[:-1], best_fit(time_axis[:-1], *popt))
     print("The values for ", name_of_file, " are: ", popt)
     #End of new code
@@ -104,7 +104,7 @@ def plot_a_file():
 
 #Best fit function we're using
 def best_fit(x,m,c,d):
-    return d*(np.exp(m*x))-c
+    return d*(np.exp(-1*m*x))+c
 
 
 
@@ -122,7 +122,7 @@ def overplot(number_of_plots):
             input("To the nearest integer, when would you say decay starts for this measurement? "))
         new_time, new_voltage = time_trimmer(time, voltage, measurement_start)
         angular_velocity, time_axis = period_finder(new_time - measurement_start, new_voltage)
-        plt.plot(time_axis[:-1], angular_velocity, 'o', label=f"{name_of_file}")
+        plt.plot(time_axis[:-1], angular_velocity, 'x', label=f"{name_of_file}")
         #Start of new code block again
         popt,pcov=cf(best_fit,time_axis[:-1],angular_velocity, maxfev=10000)
         plt.plot(time_axis[:-1],best_fit(time_axis[:-1],*popt))
