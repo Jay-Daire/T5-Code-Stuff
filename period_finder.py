@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit as cf
+from lmfit.models import ExponentialModel, ConstantModel
 
 # Apparently not every measurement starts at t = 0, to get good plots we
 # need to look at the plots of the data and estimate
@@ -87,6 +87,16 @@ def period_finder(time, voltage, strip_no=1):
     return v_ang, strip_passing_oscilloscope
 
 
+# Model data as exponential + constant
+exp_mod = ExponentialModel(prefix = "exp_")
+const_mod = ConstantModel(prefix = "const_")
+
+
+Model = exp_mod + const_mod
+
+params = Model.make_params()
+
+
 def plot_a_file():
     # Plots a single file from a dataset
     name_of_file = input("What is the name of the file you want analyzed? ")
@@ -112,18 +122,17 @@ def plot_a_file():
     acolour = next(colour)
 
     # Plotting the functions
-    plt.plot(time_axis[:-1], angular_velocity, marker = 'x', markersize = 4, color = acolour)
+    plt.plot(time_axis[:-1], angular_velocity, marker = 'x', markersize = 4, color = "k", linestyle = "none")
 
-    # Fitting a line of bets fit and set max iterations to 10000
-    popt, pcov = cf(best_fit, time_axis[:-1], angular_velocity, maxfev=10000)
+    # Fitting a line of best fit
+    out = Model.fit(angular_velocity, params, x = time_axis)
     # Plotting the line of best fit
-    plt.plot(time_axis[:-1], best_fit(time_axis[:-1], *popt), color = acolour)
-
+    plt.plot(time_axis[:-1], out.best_fit, color = "k", linestyle = "-")
     # Printing the values for the best fit function
-    print(f"The values for{name_of_file} are d = {popt[0]}, m = {popt[1]} & c = {popt[2]}")
-
+    print(out.fit_report())
+    plt.legend()
     # Old print function, use if new one is wrong or doesn't work
-    # print("The values for ", name_of_file, " are: ", popt)
+
 
     # Title displayed - Do we want it?
     answer = input("Do you want the title displayed in the image? y/n")
@@ -147,11 +156,6 @@ def plot_a_file():
 
     # Kinda redundant, I don't think a function in Python has to return anything
     return None
-
-
-# Best fit function we're using
-def best_fit(x, m, c, d):
-    return d * (np.exp(-1 * m * x)) + c
 
 
 def overplot(number_of_plots):
@@ -187,19 +191,19 @@ def overplot(number_of_plots):
         acolour = next(colour)
 
         # Plotting the file, and labeling it with the name of the meas we're plotting
-        plt.plot(time_axis[:-1], angular_velocity, 'x', label=f"{name_of_file}", markersize = 4, color = acolour)
+        plt.plot(time_axis[:-1], angular_velocity, 'x', label=f"{name_of_file}", markersize = 4, color = acolour, linestyle = "none")
 
-        # Doing the best fit and setting the max iterations to 10000 to make sure we get a good approximation
-        popt, pcov = cf(best_fit, time_axis[:-1], angular_velocity, maxfev=10000)
-
+        # Doing the best fit
+        out = Model.fit(angular_velocity, params, x=time_axis)
         # Plotting the line of best fit
-        plt.plot(time_axis[:-1], best_fit(time_axis[:-1], *popt), color = acolour)
+        plt.plot(time_axis[:-1], out.best_fit, color = acolour, label = "best fit")
 
         # Putting the legend in place
         plt.legend()
 
         # Printing the values for the best fit function
-        print(f"The values for{name_of_plot} are d = {popt[0]}, m = {popt[1]} & c = {popt[2]}")
+        print(f"Report for file {name_of_file}\n")
+        print(out.fit_report())
 
         # Old print function, use if new one is wrong or doesn't work
         # print("The values for ", name_of_plot, " are: ", popt)
