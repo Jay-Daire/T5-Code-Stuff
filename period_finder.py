@@ -153,19 +153,13 @@ def plot_a_file():
     # Yes
     if answer == "yes" or answer == "y":
         plt.title(f"{name_of_file}")
-        plt.xlabel("time (s)")
-        plt.ylabel("$\omega\ \mathrm{rad/s}$")
-        plt.xlim(0, )
-        plt.savefig(f"{name_of_file}plot")
-        plt.close()
 
-    # No
-    else:
-        plt.xlabel("time (s)")
-        plt.ylabel("$\omega\ (\mathrm{rad/s})$")
-        plt.xlim(0, )
-        plt.savefig(f"{name_of_file}plot")
-        plt.close()
+    plt.xlabel("time (s)")
+    plt.ylabel("$\omega\ \mathrm{rad/s}$")
+    plt.xlim(0, )
+    plt.savefig(f"{name_of_file}plot")
+    plt.close()
+
 
     # Kinda redundant, I don't think a function in Python has to return anything
     return None
