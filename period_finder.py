@@ -39,6 +39,12 @@ def time_trimmer(time, voltage, decay_start):
     # the end of the array
     corrected_time = corrected_time.reset_index()  # Resetting the index so that the series starts at 0
     corrected_time = corrected_time["second"]  # Renaming the new series
+    # Saving the first value of the new, corrected series so that it does not change in the loop
+    first_value = corrected_time[0]
+    # Subtracting the first value in our corrected value to each value in the array to displace
+    # everything to the left and make the plot start plotting at 0
+    for i in range(len(corrected_time)):
+        corrected_time[i] = corrected_time[i] - first_value
 
     # Correcting the voltage so that it starts when the meas starts
     corrected_voltage = voltage[index:]  # Creating a new array that goes from index (the point where the meas starts)
@@ -56,6 +62,7 @@ def period_finder(time, voltage, strip_no=1):
     strip_passing_oscilloscope = pd.Series(dtype=float, index=(i for i in range(30000)))
     periods = pd.Series(dtype=float, index=(i for i in range(10000)))
     v_ang = pd.Series(dtype=float, index=(i for i in range(10000)))
+    corrected_time_values = pd.Series(dtype=float, index = (i for i in range(10000)))
     # loop counter
     j = 0
     for i in range(len(voltage)):  # Counts every voltage drop, which corresponds to the strip passing the oscilloscope
@@ -66,6 +73,7 @@ def period_finder(time, voltage, strip_no=1):
     j = 0
     # Drop all the values in the strip_passing_oscilloscope series that have no values stored
     strip_passing_oscilloscope = strip_passing_oscilloscope.dropna()
+
     for i in range(len(strip_passing_oscilloscope) - 1):  # Finding the period of a revolution
         t1 = time[i]  # One value in the array
         t2 = strip_passing_oscilloscope[i + 1]  # Next value in the array
@@ -84,6 +92,11 @@ def period_finder(time, voltage, strip_no=1):
 
     # Drop all the values in the angular velocities series that have no values stored
     v_ang = v_ang.dropna()
+    for i in range(len(strip_passing_oscilloscope)):
+        # strip_passing_oscilloscope[i] = strip_passing_oscilloscope[i] - strip_passing_oscilloscope[0]
+        temp_value = strip_passing_oscilloscope[i] - strip_passing_oscilloscope[0]
+        strip_passing_oscilloscope [i] = strip_passing_oscilloscope[i] - strip_passing_oscilloscope[0]
+        corrected_time_values[i] = temp_value
     return v_ang, strip_passing_oscilloscope
 
 
@@ -116,7 +129,7 @@ def plot_a_file():
     new_time, new_voltage = time_trimmer(time, voltage, measurement_start)
 
     # Finding the period and correcting for the time if the measurement stars at t != 0
-    angular_velocity, time_axis = period_finder(new_time - measurement_start, new_voltage)
+    angular_velocity, time_axis = period_finder(new_time, new_voltage)
 
     # Setting the colors of the plot
     acolour = next(colour)
@@ -184,7 +197,7 @@ def overplot(number_of_plots):
         new_time, new_voltage = time_trimmer(time, voltage, measurement_start)
 
         # Finding the angular velocities and time values, accounting for the case when t != 0
-        angular_velocity, time_axis = period_finder(new_time - measurement_start, new_voltage)
+        angular_velocity, time_axis = period_finder(new_time, new_voltage)
 
         # Setting a color for the plot
 
@@ -198,11 +211,8 @@ def overplot(number_of_plots):
         # Plotting the line of best fit
         plt.plot(time_axis[:-1], out.best_fit, color = acolour, label = "best fit")
 
-        # Putting the legend in place
-        plt.legend()
-
         # Printing the values for the best fit function
-        print(f"Report for file {name_of_file}\n")
+        print(f"\nReport for file {name_of_file}")
         print(out.fit_report())
 
         # Old print function, use if new one is wrong or doesn't work
@@ -210,7 +220,9 @@ def overplot(number_of_plots):
 
     # The plot should start with t = 0
     plt.xlim(0, )
-
+    legend =  input("Do you want the legend to be shown? y/n")
+    if legend == "yes" or legend == "y":
+        plt.legend()
     # Saving the plot with the name indicated by the user
     plt.savefig(f"{name_of_plot}")
 
