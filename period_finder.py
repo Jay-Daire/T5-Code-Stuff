@@ -142,7 +142,9 @@ def plot_a_file():
     # Plotting the line of best fit
     plt.plot(time_axis[:-1], out.best_fit, color = "k", linestyle = "-")
     # Printing the values for the best fit function
-    print(out.fit_report())
+    file = open(f"{name_of_file}.txt", "w")
+    file.write(out.fit_report())
+    file.close()
     plt.legend()
     # Old print function, use if new one is wrong or doesn't work
 
@@ -170,6 +172,7 @@ def overplot(number_of_plots):
 
     # Assigning the name of the plot
     name_of_plot = input("What will you call your plot? ")
+    file = open(f"{name_of_plot}.txt", "a")
     for i in range(number_of_plots):  # Plotting the different plots
 
         # Getting the name of the file that we want to plot
@@ -206,12 +209,13 @@ def overplot(number_of_plots):
         plt.plot(time_axis[:-1], out.best_fit, color = acolour, label = "best fit")
 
         # Printing the values for the best fit function
-        print(f"\nReport for file {name_of_file}")
-        print(out.fit_report())
+        file.write(f"\nReport for file {name_of_file}")
+        file.write(out.fit_report())
 
         # Old print function, use if new one is wrong or doesn't work
         # print("The values for ", name_of_plot, " are: ", popt)
 
+    file.close()
     # The plot should start with t = 0
     plt.xlim(0, )
     legend =  input("Do you want the legend to be shown? y/n")
